@@ -29,10 +29,18 @@ public class DishWasherTest {
     WaterPump waterPump;
 
     DishWasher dishWasher;
+    ProgramConfiguration programConfiguration;
+    FillLevel fillLevel = FillLevel.FULL;
+    WashingProgram washingProgram = WashingProgram.INTENSIVE;
+    boolean tablets = true;
 
     @BeforeEach
     public void setUp(){
         dishWasher = new DishWasher(waterPump,engine,dirtFilter,door);
+        programConfiguration = ProgramConfiguration.builder()
+                                                   .withProgram(washingProgram)
+                                                   .withTabletsUsed(tablets)
+                                                   .withFillLevel(fillLevel).build();
     }
 
 }
