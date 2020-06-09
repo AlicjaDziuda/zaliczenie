@@ -9,6 +9,7 @@ import edu.iis.mto.testreactor.dishwasher.engine.EngineException;
 import edu.iis.mto.testreactor.dishwasher.pump.PumpException;
 import edu.iis.mto.testreactor.dishwasher.pump.WaterPump;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,18 +67,24 @@ public class DishWasherTest {
         order.verify(door).unlock();
     }
 
-    @Test void dishWasherShouldResultWithSuccess() throws PumpException, EngineException {
+    @Test void dishWasherShouldResultWithSuccess(){
         when(door.closed()).thenReturn(true); //drzwi zamkniete
         when(dirtFilter.capacity()).thenReturn(51.0d);
         RunResult runResult = dishWasher.start(programConfiguration);
         RunResult expected = RunResult.builder().withStatus(Status.SUCCESS).withRunMinutes(120).build();
-        assertEquals(expected,runResult);
+        Assertions.assertEquals(expected,runResult);
     }
 
-    @Test void dishWasherShouldFinishedWithDoorOpenError() throws PumpException, EngineException {
+    @Test void dishWasherShouldFinishedWithDoorOpenError()  {
         when(door.closed()).thenReturn(false);
         RunResult runResult = dishWasher.start(programConfiguration);
         RunResult expected = RunResult.builder().withStatus(Status.DOOR_OPEN).withRunMinutes(0).build();
         assertTrue(runResult==expected);
+    }
+
+    @Test void washingWithOpenDoorShouldCallOnlyClosedMethod() {
+        when(door.closed()).thenReturn(false);
+        dishWasher.start(programConfiguration);
+        verify(door).closed();
     }
 }
