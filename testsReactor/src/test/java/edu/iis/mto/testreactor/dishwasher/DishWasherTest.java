@@ -1,16 +1,19 @@
 package edu.iis.mto.testreactor.dishwasher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import edu.iis.mto.testreactor.dishwasher.engine.Engine;
+import edu.iis.mto.testreactor.dishwasher.engine.EngineException;
+import edu.iis.mto.testreactor.dishwasher.pump.PumpException;
 import edu.iis.mto.testreactor.dishwasher.pump.WaterPump;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +38,7 @@ public class DishWasherTest {
 
     DishWasher dishWasher;
     ProgramConfiguration programConfiguration;
-    FillLevel fillLevel = FillLevel.FULL;
+    FillLevel fillLevel = FillLevel.HALF;
     WashingProgram washingProgram = WashingProgram.INTENSIVE;
     boolean tablets = true;
 
@@ -48,10 +51,16 @@ public class DishWasherTest {
                                                    .withFillLevel(fillLevel).build();
     }
 
-    @Test void name() {
-
-        when(door.closed()).thenReturn(true);
+    @Test void dishWasherShouldCallProperlyMethods() throws PumpException, EngineException {
+        when(door.closed()).thenReturn(true); //drzwi zamkniete
+        when(dirtFilter.capacity()).thenReturn(51.0d);
         dishWasher.start(programConfiguration);
-        verify(door).closed();
+
+        InOrder order = Mockito.inOrder(dirtFilter,engine,door,waterPump);
+        order.verify(door).closed();
+        order.verify(dirtFilter).capacity();
+        order.verify(waterPump).pour(fillLevel);
+        order.verify(engine).runProgram(washingProgram);
+        order.verify(waterPump).drain();
     }
 }
