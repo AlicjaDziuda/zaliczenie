@@ -87,4 +87,13 @@ public class DishWasherTest {
         dishWasher.start(programConfiguration);
         verify(door).closed();
     }
+
+    @Test void dishWashyMethods() throws PumpException, EngineException {
+        when(door.closed()).thenReturn(true); //drzwi zamkniete
+        when(dirtFilter.capacity()).thenReturn(23.0d);
+        dishWasher.start(programConfiguration);
+        doThrow().when(waterPump).pour(fillLevel);
+        //when(waterPump).thenThrow(PumpException.class);
+        assertThrows(PumpException.class,()->when(waterPump));
+    }
 }
